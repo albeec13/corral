@@ -17,11 +17,13 @@ type LoginHelper struct {
     dbh *DBHelper
 }
 
-func (lh *LoginHelper) Login(form *LoginForm) (string, error) {
+func (lh *LoginHelper) Login(form *LoginForm) ([]byte, error) {
+    token := make([]byte, 32)
     if form.User == "herp" && form.Password == "derp" {
-        return "sessiontoken", nil
+        _, err := rand.Read(token)
+        return token, err
     } else {
-        return "", errors.New("invalid email or password")
+        return token, errors.New("invalid email or password")
     }
 }
 
@@ -29,12 +31,13 @@ func (lh *LoginHelper) LoginCreate(form *LoginForm) (error) {
     salt := make([]byte, 32)
     dk := make([]byte, 32)
     _, err := rand.Read(salt)
-
+    
     if err == nil {
         fmt.Printf("Salt: %s\n", hex.EncodeToString(salt))
         if dk, err = scrypt.Key([]byte(form.Password), salt, 16384, 8, 1, 32); err == nil {
             fmt.Printf("Hash: %s\n", hex.EncodeToString(dk))
         }
     }
+
     return err
 }
