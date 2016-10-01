@@ -5,6 +5,7 @@ import (
     "github.com/gin-gonic/gin"
     "fmt"
     "log"
+    "encoding/hex"
     //"golang.org/x/crypto/scrypt"
 )
 
@@ -17,6 +18,7 @@ func main() {
     var dbh DBHelper
     var config ConfigFile
     var lh LoginHelper
+    var sm SessionManager
     path := "corral.conf"
 
     if err := config.ReadConfigFile(path); err == nil {
@@ -39,6 +41,10 @@ func main() {
         log.Fatalf("FATAL ERROR: %s\n", err)
     }
 
+    // start session manager
+    sm.Init()
+    lh.SessionManager = &sm
+
     // Configure routes
     router := gin.Default()
 
@@ -48,7 +54,7 @@ func main() {
         var form LoginForm
         if c.Bind(&form) == nil {
             if sess_token, err := lh.Login(&form); err == nil {
-                c.JSON(http.StatusOK, gin.H{"session_token" : sess_token})
+                c.JSON(http.StatusOK, gin.H{"session_token" : hex.EncodeToString(sess_token)})
             } else {
                 c.JSON(http.StatusUnauthorized, gin.H{"error" : err.Error()})
             }
