@@ -27,9 +27,9 @@ func main() {
             if tables, err = dbh.GetTables(); err == nil {
                 for _, table := range tables {
                     fmt.Printf("Table: %s\n", table)
-                    fmt.Println(lh.dbh)
-                    lh.dbh = &dbh
-                    fmt.Println(lh.dbh)
+                    fmt.Println(lh.DBHelper)
+                    lh.DBHelper = &dbh
+                    fmt.Println(lh.DBHelper)
                 }
             } else {
                 fmt.Printf("DATABASE ERROR: %s\n", err)

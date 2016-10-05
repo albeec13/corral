@@ -3,6 +3,7 @@ package main
 import (
     "database/sql"
     _ "github.com/go-sql-driver/mysql"
+    "errors"
 )
 
 type DBHelper struct{
@@ -35,6 +36,38 @@ func (dbh *DBHelper) GetTables() ([]string, error) {
     return tables, err
 }
 
+func (dbh *DBHelper) GetUserCreds(user *string) (salt []byte, hash []byte, err error) {
+    salt = make([]byte, 32)
+    hash = make([]byte, 32)
+
+    if err = dbh.db.QueryRow("SELECT pwdsalt, pwdhash FROM users WHERE email LIKE(?)", user).Scan(&salt, &hash); err == sql.ErrNoRows {
+        err = errors.New("Email address does not exist")
+    }
+    return salt, hash, err
+}
+
+func (dbh *DBHelper) CreateUser(user *string, salt *[]byte, hash *[]byte) (result sql.Result, err error) {
+    var email string
+
+    if err = dbh.db.QueryRow("SELECT email FROM users WHERE email LIKE(?)", user).Scan(&email); err == sql.ErrNoRows {
+        // no hits, so we can create this user
+        result, err = dbh.db.Exec(
+            "INSERT INTO users (email, pwdsalt, pwdhash, activated) VALUES (?,?,?,?)",
+            user,
+            salt,
+            hash,
+            false,
+        )
+    } else if err != nil {
+        // some other error occured, don't need to do anything
+    } else {
+        // non-error, user exists, so we can't create this user. also destroy result before returning
+        err = errors.New("Email address already exists")
+        result = nil
+    }
+
+    return result, err
+}
 /*func (dbh *DBHelper) LogDevice(de *DHCPEvent) (result sql.Result, err error) {
     var device_id int64
 
