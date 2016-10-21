@@ -91,6 +91,25 @@
                 color: red;
                 margin-top: 10px;
             }
+
+            .login-block div#alt-login-links {
+                width: 100%;
+                color: #000;
+                font-size: 12px;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+
+			.login-block div#alt-login-links .left {
+				text-align: left;
+  				padding-left: 25px;
+			}
+
+			.login-block div#alt-login-links .right {
+				text-align: right;
+				float: right;
+  				padding-right: 25px;
+			}
         </style>
         <title>Login Page</title>
         <script type="text/javascript">
@@ -118,6 +137,10 @@
             <h1>Login</h1><input type="text" value="" placeholder="Email Address" id="email" />
             <input type="password" value="" placeholder="Password" id="password" />
             <button onclick="Submit();">Submit</button>
+            <div id="alt-login-links">
+                <a href="/corral/createLogin.html" class="left">Create an account</a>
+                <a href="/corral/resetPassword.html" class="right">Forgot your password?</a>
+            </div> 
             <div id="response"></div>
         </div>
     </body>
