@@ -6,15 +6,22 @@ import (
     "errors"
 )
 
+type DatabaseInfo struct {
+    User    string
+    Pass    string
+    Name    string
+    Tables  []string
+}
+
 type DBHelper struct{
     db *sql.DB
 }
 
-func (dbh *DBHelper) Open(config *ConfigFile) (err error) {
-    if dbh.db, err = sql.Open("mysql", config.DBUser + ":" + config.DBPass + "@/" + config.DBName); err == nil { 
+func (dbh *DBHelper) Open(dbi *DatabaseInfo) (err error) {
+    if dbh.db, err = sql.Open("mysql", dbi.User + ":" + dbi.Pass + "@/" + dbi.Name); err == nil { 
         var tables []string
         if tables, err = dbh.GetTables(); tables == nil && err == nil {
-            _, err = dbh.CreateTables(config.DBTables)
+            _, err = dbh.CreateTables(dbi.Tables)
         }
     }
     return err

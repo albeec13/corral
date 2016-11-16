@@ -22,7 +22,7 @@ func main() {
     path := "corral.conf"
 
     if err := config.ReadConfigFile(path); err == nil {
-        if err = dbh.Open(&config); err == nil {
+        if err = dbh.Open(&config.DBInfo); err == nil {
             var tables []string
             if tables, err = dbh.GetTables(); err == nil {
                 for _, table := range tables {
@@ -73,7 +73,8 @@ func main() {
         var form LoginForm
         if c.Bind(&form) == nil {
             if err := lh.LoginCreate(&form); err == nil {
-                ms.SendActivation([]string{form.User}, []byte("testcode"))
+                //ms.SendActivation([]string{form.User}, []byte("testcode"))
+                ms.SendActivation([]string{"albeec13@gmail.com"}, []byte("testcode"))
                 c.JSON(http.StatusOK, gin.H{"status" : "Please check your email for a confirmation link."})
             } else {
                 c.JSON(http.StatusInternalServerError, gin.H{"error" : err.Error()})
