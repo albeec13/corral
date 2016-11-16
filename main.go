@@ -6,7 +6,6 @@ import (
     "fmt"
     "log"
     "encoding/hex"
-    //"golang.org/x/crypto/scrypt"
 )
 
 type LoginForm struct {
@@ -19,6 +18,7 @@ func main() {
     var config ConfigFile
     var lh LoginHelper
     var sm SessionManager
+    var ms MailServer
     path := "corral.conf"
 
     if err := config.ReadConfigFile(path); err == nil {
@@ -27,9 +27,6 @@ func main() {
             if tables, err = dbh.GetTables(); err == nil {
                 for _, table := range tables {
                     fmt.Printf("Table: %s\n", table)
-                    fmt.Println(lh.DBHelper)
-                    lh.DBHelper = &dbh
-                    fmt.Println(lh.DBHelper)
                 }
             } else {
                 fmt.Printf("DATABASE ERROR: %s\n", err)
@@ -41,9 +38,17 @@ func main() {
         log.Fatalf("FATAL ERROR: %s\n", err)
     }
 
+    fmt.Println(lh.DBHelper)
+
+    // start mail server interface
+    ms.Init(&config.MailInfo)
+
     // start session manager
     sm.Init()
-    lh.SessionManager = &sm
+
+    // start login helper
+    lh.Init(&sm, &dbh)
+    fmt.Println(lh)
 
     // Configure routes
     router := gin.Default()
@@ -68,6 +73,7 @@ func main() {
         var form LoginForm
         if c.Bind(&form) == nil {
             if err := lh.LoginCreate(&form); err == nil {
+                ms.SendActivation([]string{form.User}, []byte("testcode"))
                 c.JSON(http.StatusOK, gin.H{"status" : "Please check your email for a confirmation link."})
             } else {
                 c.JSON(http.StatusInternalServerError, gin.H{"error" : err.Error()})

@@ -15,6 +15,11 @@ type LoginHelper struct {
     *DBHelper
 }
 
+func (lh *LoginHelper) Init(sm *SessionManager, dbh *DBHelper) () {
+    lh.SessionManager = sm
+    lh.DBHelper = dbh
+}
+
 func (lh *LoginHelper) Login(form *LoginForm) ([]byte, error) {
     var token, salt, hash []byte
     var err error
@@ -41,11 +46,12 @@ func (lh *LoginHelper) LoginCreate(form *LoginForm) (err error) {
         dk := make([]byte, 32)
 
         if _, err = rand.Read(salt); err == nil {
-            fmt.Printf("Salt: %s\n", hex.EncodeToString(salt))
             if dk, err = scrypt.Key([]byte(form.Password), salt, 16384, 8, 1, 32); err == nil {
-                fmt.Printf("Hash: %s\n", hex.EncodeToString(dk))
+                if _, err = lh.CreateUser(&form.User, &salt, &dk); err == nil {
+                    fmt.Printf("Salt: %s\n", hex.EncodeToString(salt))
+                    fmt.Printf("Hash: %s\n", hex.EncodeToString(dk))
+                }
             }
-            _, err = lh.CreateUser(&form.User, &salt, &dk)
         }
     }
     return err

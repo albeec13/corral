@@ -10,6 +10,7 @@ type ConfigFile struct {
     DBPass  string
     DBName  string
     DBTables []string
+    MailInfo MailServerInfo
 }
 
 func (cf *ConfigFile) ReadConfigFile(path string) (error) {

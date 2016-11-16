@@ -4,5 +4,11 @@
     "DBName" : "dbname",
     "DBTables" : [
         "CREATE TABLE users (id INT UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT, email VARCHAR(254) NOT NULL UNIQUE, pwdsalt BINARY(32) NOT NULL, pwdhash BINARY(32) NOT NULL, activated BOOL NOT NULL);"
-    ]
+    ],
+    "MailInfo": {
+        "User" : "user",
+        "Pass" : "pass",
+        "Server" : "server",
+        "Port" : "587"
+    }
 }
