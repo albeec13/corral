@@ -27,8 +27,13 @@ func (ms *MailServer) Init (msi *MailServerInfo) () {
 func (ms *MailServer) SendActivation (to []string, code []byte ) (error) {
     msg := []byte("To: ")
 
-    for _, t := range to {
-        msg = append(msg, []byte(t)...)
+    for i, t := range to {
+        if i == 0 {
+            msg = append(msg, []byte(t)...)
+        } else {
+            msg = append(msg, ", "...)
+            msg = append(msg, []byte(t)...)
+        }
     }
 
     msg = append(msg, []byte("\r\n" +
@@ -37,7 +42,7 @@ func (ms *MailServer) SendActivation (to []string, code []byte ) (error) {
         "Thanks for registering for Corral!\r\n" +
         "\r\n" +
         "Please click the following link to activate your account: \r\n" +
-        "\thttp://thewalr.us/corral/activate/" + hex.EncodeToString(code) + "\r\n" +
+        "\thttps://thewalr.us/corral/activate/" + hex.EncodeToString(code) + "\r\n" +
         "\r\n" +
         "If you have received this message in error, please ignore it.\r\n" +
         "\r\n" +

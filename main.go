@@ -53,9 +53,9 @@ func main() {
     // Configure routes
     router := gin.Default()
 
-    router.Static("/corral/","./html")
+    router.Static("/corral/","./www")
 
-    router.POST("/corral/login", func(c *gin.Context) {
+    router.POST("/corral/API/login", func(c *gin.Context) {
         var form LoginForm
         if c.Bind(&form) == nil {
             if sess_token, err := lh.Login(&form); err == nil {
@@ -69,12 +69,12 @@ func main() {
         }
     })
 
-    router.POST("/corral/createLogin", func(c *gin.Context) {
+    router.POST("/corral/API/createLogin", func(c *gin.Context) {
         var form LoginForm
         if c.Bind(&form) == nil {
             if err := lh.LoginCreate(&form); err == nil {
                 //ms.SendActivation([]string{form.User}, []byte("testcode"))
-                ms.SendActivation([]string{"albeec13@gmail.com"}, []byte("testcode"))
+                ms.SendActivation([]string{"albeec13@gmail.com","albeec13@gmail.com"}, []byte("testcode"))
                 c.JSON(http.StatusOK, gin.H{"status" : "Please check your email for a confirmation link."})
             } else {
                 c.JSON(http.StatusInternalServerError, gin.H{"error" : err.Error()})

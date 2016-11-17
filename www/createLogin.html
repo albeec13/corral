@@ -40,22 +40,22 @@
             }
 
             .login-block input#email {
-                background: #fff url('http://i.imgur.com/u0XmBmv.png') 20px top no-repeat;
+                background: #fff url('https://i.imgur.com/u0XmBmv.png') 20px top no-repeat;
                 background-size: 16px 80px;
             }
 
             .login-block input#email:focus {
-                background: #fff url('http://i.imgur.com/u0XmBmv.png') 20px bottom no-repeat;
+                background: #fff url('https://i.imgur.com/u0XmBmv.png') 20px bottom no-repeat;
                 background-size: 16px 80px;
             }
 
             .login-block input#password {
-                background: #fff url('http://i.imgur.com/Qf83FTt.png') 20px top no-repeat;
+                background: #fff url('https://i.imgur.com/Qf83FTt.png') 20px top no-repeat;
                 background-size: 16px 80px;
             }
 
             .login-block input#password:focus {
-                background: #fff url('http://i.imgur.com/Qf83FTt.png') 20px bottom no-repeat;
+                background: #fff url('https://i.imgur.com/Qf83FTt.png') 20px bottom no-repeat;
                 background-size: 16px 80px;
             }
 
@@ -100,47 +100,25 @@
                 margin-bottom: 20px;
             }
 
-			.login-block div#alt-login-links .left {
-				text-align: left;
-  				padding-left: 25px;
-			}
-
-			.login-block div#alt-login-links .right {
-				text-align: right;
-				float: right;
-  				padding-right: 25px;
-			}
-        </style>
-        <title>Login Page</title>
-        <script type="text/javascript">
-            var Submit = function() {
-                var xhr = new XMLHttpRequest();
-                var loginJSON = {
-                    email: '',
-                    password: ''
-                };
-                
-                xhr.open('POST', '/corral/login');
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.onload = function() {
-                    var userInfo = JSON.parse(xhr.responseText);
-                    document.getElementById("response").innerHTML = JSON.stringify(userInfo);
-                };
-                loginJSON.email = document.getElementById("email").value;
-                loginJSON.password = document.getElementById("password").value;
-                xhr.send(JSON.stringify(loginJSON));
+            .login-block div#alt-login-links .left {
+                text-align: left;
+                padding-left: 25px;
             }
-        </script>
+
+            .login-block div#alt-login-links .right {
+                text-align: right;
+                float: right;
+                padding-right: 25px;
+            }
+        </style>
+        <title>Corral - Create Account</title>
+        <script src="js/login.js"></script>
     </head>
     <body>
         <div class="login-block">
-            <h1>Login</h1><input type="text" value="" placeholder="Email Address" id="email" />
+            <h1>Create Account</h1><input type="text" value="" placeholder="Email Address" id="email" />
             <input type="password" value="" placeholder="Password" id="password" />
-            <button onclick="Submit();">Submit</button>
-            <div id="alt-login-links">
-                <a href="/corral/createLogin.html" class="left">Create an account</a>
-                <a href="/corral/resetPassword.html" class="right">Forgot your password?</a>
-            </div> 
+            <button onclick="SubmitLogin('createLogin');">Submit</button>
             <div id="response"></div>
         </div>
     </body>
