@@ -43,14 +43,15 @@ func (dbh *DBHelper) GetTables() ([]string, error) {
     return tables, err
 }
 
-func (dbh *DBHelper) GetUserCreds(user *string) (salt []byte, hash []byte, err error) {
+func (dbh *DBHelper) GetUserCreds(user *string) (salt []byte, hash []byte, activated bool, err error) {
     salt = make([]byte, 32)
     hash = make([]byte, 32)
+    activated = false 
 
-    if err = dbh.db.QueryRow("SELECT pwdsalt, pwdhash FROM users WHERE email LIKE(?)", user).Scan(&salt, &hash); err == sql.ErrNoRows {
+    if err = dbh.db.QueryRow("SELECT pwdsalt, pwdhash, activated FROM users WHERE email LIKE(?)", user).Scan(&salt, &hash, &activated); err == sql.ErrNoRows {
         err = errors.New("Email address does not exist")
     }
-    return salt, hash, err
+    return salt, hash, activated, err
 }
 
 func (dbh *DBHelper) CreateUser(user *string, salt *[]byte, hash *[]byte) (result sql.Result, err error) {

@@ -47,7 +47,7 @@ func main() {
     sm.Init()
 
     // start login helper
-    lh.Init(&sm, &dbh)
+    lh.Init(&sm, &dbh, &ms)
     fmt.Println(lh)
 
     // Configure routes
@@ -73,8 +73,6 @@ func main() {
         var form LoginForm
         if c.Bind(&form) == nil {
             if err := lh.LoginCreate(&form); err == nil {
-                //ms.SendActivation([]string{form.User}, []byte("testcode"))
-                ms.SendActivation([]string{"albeec13@gmail.com","albeec13@gmail.com"}, []byte("testcode"))
                 c.JSON(http.StatusOK, gin.H{"status" : "Please check your email for a confirmation link."})
             } else {
                 c.JSON(http.StatusInternalServerError, gin.H{"error" : err.Error()})

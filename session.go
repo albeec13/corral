@@ -7,6 +7,13 @@ import (
     "fmt"
 )
 
+type TimeMinutes int64
+
+const (
+    API_TIMEOUT TimeMinutes = 10
+    ACTIVATION_TIMEOUT TimeMinutes = (24 * 60)
+)
+
 type Session struct {
     token []byte
     expTimeUnix int64
@@ -47,12 +54,12 @@ func (sm *SessionManager) startCleanup() () {
     }()
 }
 
-func (sm *SessionManager) RenewSession(user string, token []byte) () {
+func (sm *SessionManager) RenewSession(user string, token []byte, timeout TimeMinutes) () {
     sm.mut.Lock()
     defer sm.mut.Unlock()
 
-    // Set session expiration time to now + 10 minutes (Unix time in seconds + 10 * 60s)
-    sess := Session{token, time.Now().Unix() + 10 * 60}
+    tmrLength := time.Now().Unix() + (int64(timeout) * 60)
+    sess := Session{token, tmrLength}
     sm.userSessions[user] = sess
     fmt.Println(sm.userSessions)
 }
