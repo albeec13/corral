@@ -5,7 +5,7 @@ var SubmitLogin = function(command) {
         password: ''
     };
 
-    xhr.open('POST', '/corral/API/' + command);
+    xhr.open('POST', 'https://thewalr.us/corral/API/' + command);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onload = function() {
         var userInfo = JSON.parse(xhr.responseText);

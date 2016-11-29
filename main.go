@@ -50,12 +50,18 @@ func main() {
     lh.Init(&sm, &dbh, &ms)
     fmt.Println(lh)
 
+
     // Configure routes
     router := gin.Default()
+	router.Use(CORSMiddleware())
+    routerStatic := gin.Default()
 
-    router.Static("/corral/","./www")
+    // Static routes to html
+    routerStatic.Static("/","./www")
 
+    // Remaining routes are API routes
     router.POST("/corral/API/login", func(c *gin.Context) {
+        fmt.Println(c.Request.Host)
         var form LoginForm
         if c.Bind(&form) == nil {
             if sess_token, err := lh.Login(&form); err == nil {
@@ -82,6 +88,50 @@ func main() {
         }
     })
 
-    // Run server
-    router.Run(":4569")
+    router.GET("/corral/API/activate/:token", func(c *gin.Context) {
+        token := c.Param("token")
+        fmt.Println("Token confirmed:" + token)
+    })
+
+    // Run servers
+    go router.Run(":4569")
+    routerStatic.Run(":4570")
+}
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+        origin := ""
+        if len(c.Request.Header["Origin"]) > 0 {
+            origin = c.Request.Header["Origin"][0]
+            fmt.Println("Origin: " + origin)
+        }
+        allowed := false;
+        whiteList := []string{"https://thewalr.us","https://www.thewalr.us","https://corral.thewalr.us"}
+
+        for _, dom := range whiteList {
+            if dom == origin {
+                allowed = true;
+            }
+        }
+
+        if(allowed) {
+		    c.Writer.Header().Set("Access-Control-Allow-Origin",origin)
+            c.Writer.Header().Set("Access-Control-Allow-Credentials","true") 
+            c.Writer.Header().Set("Vary","Origin")
+            c.Writer.Header().Set("Access-Control-Expose-Headers","Location")
+
+		    if c.Request.Method == "OPTIONS" {
+			    c.Writer.Header().Set("Access-Control-Allow-Headers","Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Mx-ReqToken,Keep-Alive,X-Requested-With,If-Modified-Since")
+                c.Writer.Header().Set("Access-Control-Allow-Methods","GET, POST, OPTIONS")
+                c.Writer.Header().Set("Access-Control-Max-Age","1728000")
+                c.Writer.Header().Set("Content-Length","0")
+                c.Writer.Header().Set("Content-Type","text/plain charset=UTF-8")
+			    c.AbortWithStatus(204)
+			    return
+		    }
+		    c.Next()
+        } else {
+            c.AbortWithStatus(404)
+        }
+    }
 }

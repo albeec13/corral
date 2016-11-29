@@ -42,7 +42,7 @@ func (ms *MailServer) SendActivation (to []string, code []byte ) (error) {
         "Thanks for registering for Corral!\r\n" +
         "\r\n" +
         "Please click the following link to activate your account: \r\n" +
-        "\thttps://thewalr.us/corral/activate/" + hex.EncodeToString(code) + "\r\n" +
+        "\thttps://thewalr.us/corral/API/activate/" + hex.EncodeToString(code) + "\r\n" +
         "\r\n" +
         "If you have received this message in error, please ignore it.\r\n" +
         "\r\n" +
