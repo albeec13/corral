@@ -6,6 +6,7 @@ import (
     "fmt"
     "log"
     "encoding/hex"
+    "strings"
 )
 
 type LoginForm struct {
@@ -61,7 +62,6 @@ func main() {
 
     // Remaining routes are API routes
     router.POST("/corral/API/login", func(c *gin.Context) {
-        fmt.Println(c.Request.Host)
         var form LoginForm
         if c.Bind(&form) == nil {
             if sess_token, err := lh.Login(&form); err == nil {
@@ -69,7 +69,6 @@ func main() {
             } else {
                 c.JSON(http.StatusUnauthorized, gin.H{"error" : err.Error()})
             }
-            fmt.Println(form)
         } else {
             c.JSON(http.StatusBadRequest, gin.H{"error" : "invalid API access"})
         }
@@ -88,9 +87,22 @@ func main() {
         }
     })
 
-    router.GET("/corral/API/activate/:token", func(c *gin.Context) {
+    router.GET("/corral/API/activate/:userEnc/:token", func(c *gin.Context) {
         token := c.Param("token")
-        fmt.Println("Token confirmed:" + token)
+        var user,tokenBytes []byte
+        var err error
+
+        if user,err = hex.DecodeString(c.Param("userEnc")); err == nil {
+            if tokenBytes,err = hex.DecodeString(token); err == nil {
+                if err = lh.LoginActivate(string(user), tokenBytes); err == nil {
+                    c.Redirect(http.StatusSeeOther, "https://corral.thewalr.us/login.html")
+                } else {
+                    c.JSON(http.StatusBadRequest, gin.H{"error" : "invalid API access"})
+                }
+            }
+        } else {
+            c.JSON(http.StatusBadRequest, gin.H{"error" : "invalid API access"})
+        }
     })
 
     // Run servers
@@ -103,20 +115,30 @@ func CORSMiddleware() gin.HandlerFunc {
         origin := ""
         if len(c.Request.Header["Origin"]) > 0 {
             origin = c.Request.Header["Origin"][0]
-            fmt.Println("Origin: " + origin)
         }
+        rURL := c.Request.URL.Path
         allowed := false;
-        whiteList := []string{"https://thewalr.us","https://www.thewalr.us","https://corral.thewalr.us"}
 
-        for _, dom := range whiteList {
+        originWhiteList := []string{"https://thewalr.us","https://www.thewalr.us","https://corral.thewalr.us"}
+        apiURLWhiteList := []string{"/corral/API/activate"}
+
+        for _,dom := range originWhiteList {
             if dom == origin {
-                allowed = true;
+                allowed = true
             }
         }
 
-        if(allowed) {
+        if !allowed {
+            for _,url := range apiURLWhiteList {
+                if strings.HasPrefix(rURL, url) {
+                    allowed = true
+                }
+            }
+        }
+
+        if allowed {
 		    c.Writer.Header().Set("Access-Control-Allow-Origin",origin)
-            c.Writer.Header().Set("Access-Control-Allow-Credentials","true") 
+            c.Writer.Header().Set("Access-Control-Allow-Credentials","true")
             c.Writer.Header().Set("Vary","Origin")
             c.Writer.Header().Set("Access-Control-Expose-Headers","Location")
 

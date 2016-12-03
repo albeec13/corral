@@ -4,7 +4,6 @@ import (
     "time"
     "sync"
     "bytes"
-    "fmt"
 )
 
 type TimeMinutes int64
@@ -40,8 +39,7 @@ func (sm *SessionManager) startCleanup() () {
                 if now > sess.expTimeUnix {
                     sm.mut.RUnlock()
                     sm.mut.Lock()
-                        fmt.Printf("Cleaned up %s.\n", user)
-                        delete(sm.userSessions, user)
+                    delete(sm.userSessions, user)
                     sm.mut.Unlock()
                     sm.mut.RLock()
                 }
@@ -61,7 +59,6 @@ func (sm *SessionManager) RenewSession(user string, token []byte, timeout TimeMi
     tmrLength := time.Now().Unix() + (int64(timeout) * 60)
     sess := Session{token, tmrLength}
     sm.userSessions[user] = sess
-    fmt.Println(sm.userSessions)
 }
 
 func (sm *SessionManager) IsTokenValid(user string, token []byte) (ret bool) {
@@ -73,6 +70,5 @@ func (sm *SessionManager) IsTokenValid(user string, token []byte) (ret bool) {
             ret = true
         }
     }
-    ret = false
     return ret
 }

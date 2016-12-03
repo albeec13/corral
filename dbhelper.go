@@ -76,6 +76,17 @@ func (dbh *DBHelper) CreateUser(user *string, salt *[]byte, hash *[]byte) (resul
 
     return result, err
 }
+
+func (dbh *DBHelper) ActivateUser(user *string) (result sql.Result, err error) {
+    result, err = dbh.db.Exec("UPDATE users SET activated=TRUE WHERE email=?", user)
+    return result, err
+}
+
+func (dbh *DBHelper) DeactivateUser(user *string) (result sql.Result, err error) {
+    result, err = dbh.db.Exec("UPDATE users SET activated=FALSE WHERE email=?", user)
+    return result, err
+}
+
 /*func (dbh *DBHelper) LogDevice(de *DHCPEvent) (result sql.Result, err error) {
     var device_id int64
 
