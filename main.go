@@ -54,7 +54,7 @@ func main() {
 
     // Configure routes
     router := gin.Default()
-	router.Use(CORSMiddleware())
+    router.Use(CORSMiddleware())
     routerStatic := gin.Default()
 
     // Static routes to html
@@ -111,7 +111,7 @@ func main() {
 }
 
 func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
+    return func(c *gin.Context) {
         origin := ""
         if len(c.Request.Header["Origin"]) > 0 {
             origin = c.Request.Header["Origin"][0]
@@ -137,21 +137,21 @@ func CORSMiddleware() gin.HandlerFunc {
         }
 
         if allowed {
-		    c.Writer.Header().Set("Access-Control-Allow-Origin",origin)
+            c.Writer.Header().Set("Access-Control-Allow-Origin",origin)
             c.Writer.Header().Set("Access-Control-Allow-Credentials","true")
             c.Writer.Header().Set("Vary","Origin")
             c.Writer.Header().Set("Access-Control-Expose-Headers","Location")
 
-		    if c.Request.Method == "OPTIONS" {
-			    c.Writer.Header().Set("Access-Control-Allow-Headers","Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Mx-ReqToken,Keep-Alive,X-Requested-With,If-Modified-Since")
+            if c.Request.Method == "OPTIONS" {
+                c.Writer.Header().Set("Access-Control-Allow-Headers","Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Mx-ReqToken,Keep-Alive,X-Requested-With,If-Modified-Since")
                 c.Writer.Header().Set("Access-Control-Allow-Methods","GET, POST, OPTIONS")
                 c.Writer.Header().Set("Access-Control-Max-Age","1728000")
                 c.Writer.Header().Set("Content-Length","0")
                 c.Writer.Header().Set("Content-Type","text/plain charset=UTF-8")
-			    c.AbortWithStatus(204)
-			    return
-		    }
-		    c.Next()
+                c.AbortWithStatus(204)
+                return
+            }
+            c.Next()
         } else {
             c.AbortWithStatus(404)
         }

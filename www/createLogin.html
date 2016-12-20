@@ -2,13 +2,22 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
         <title>Corral - Create Account</title>
+        <script src="https://use.fontawesome.com/9ea651f454.js"></script>
         <script src="js/login.js"></script>
         <link rel="stylesheet" type="text/css" href="css/login.css" />
+        <link rel="shortcut icon" href="favicon.ico" />
     </head>
     <body>
         <div class="login-block">
-            <h1>Create Account</h1><input type="text" value="" placeholder="Email Address" id="email" />
-            <input type="password" value="" placeholder="Password" id="password" />
+            <h1>Create Account</h1>
+            <div class="inputBox">
+                <input type="text" value="" placeholder="Email Address" id="email" />
+                <i class="fa fa-user" aria-hidden="true"></i>
+            </div>
+            <div class="inputBox">
+                <input type="password" value="" placeholder="Password" id="password" />
+                <i class="fa fa-lock" aria-hidden="true"></i>
+            </div>
             <button onclick="SubmitLogin('createLogin');">Submit</button>
             <div id="response"></div>
         </div>
