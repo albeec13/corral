@@ -14,6 +14,11 @@ type LoginForm struct {
     Password    string `form:"password" json:"password" binding:"required"`
 }
 
+type SessionCreds struct {
+    User        string `form:"email" json:"email" binding:"required"`
+    SessToken   string `form:"session_token" json:"session_token" binding:"required"`
+}
+
 func main() {
     var dbh DBHelper
     var config ConfigFile
@@ -65,7 +70,7 @@ func main() {
         var form LoginForm
         if c.Bind(&form) == nil {
             if sess_token, err := lh.Login(&form); err == nil {
-                c.JSON(http.StatusOK, gin.H{"session_token" : hex.EncodeToString(sess_token)})
+                c.JSON(http.StatusOK, gin.H{"session_token" : hex.EncodeToString(sess_token), "session_user" : hex.EncodeToString([]byte(form.User))})
             } else {
                 c.JSON(http.StatusUnauthorized, gin.H{"error" : err.Error()})
             }
@@ -87,18 +92,42 @@ func main() {
         }
     })
 
+    router.GET("/corral/API/data/:action", func(c *gin.Context) {
+        var err error
+        var user, tokenBytes []byte
+        userHexStr := c.GetHeader("X-Request-ID")
+        tokenHexStr := c.GetHeader("X-Request-Token")
+        action := c.Param("action")
+
+        if user, err = hex.DecodeString(userHexStr); err == nil {
+            if tokenBytes, err = hex.DecodeString(tokenHexStr); err == nil {
+                if tokenBytes, err = lh.LoginRenewToken(string(user), tokenBytes); err == nil {
+                    c.JSON(http.StatusOK, gin.H{"session_token" : hex.EncodeToString(tokenBytes), "session_user" : userHexStr, "action" : action})
+                } else {
+                    c.JSON(http.StatusInternalServerError, gin.H{"error" : err.Error()})
+                }
+            } else {
+                c.JSON(http.StatusBadRequest, gin.H{"error" : "invalid API access"})
+            }
+        } else {
+            c.JSON(http.StatusBadRequest, gin.H{"error" : "invalid API access"})
+        }
+    })
+
     router.GET("/corral/API/activate/:userEnc/:token", func(c *gin.Context) {
-        token := c.Param("token")
-        var user,tokenBytes []byte
+        tokenHexStr := c.Param("token")
+        var user, tokenBytes []byte
         var err error
 
-        if user,err = hex.DecodeString(c.Param("userEnc")); err == nil {
-            if tokenBytes,err = hex.DecodeString(token); err == nil {
+        if user, err = hex.DecodeString(c.Param("userEnc")); err == nil {
+            if tokenBytes, err = hex.DecodeString(tokenHexStr); err == nil {
                 if err = lh.LoginActivate(string(user), tokenBytes); err == nil {
                     c.Redirect(http.StatusSeeOther, "https://corral.thewalr.us/login.html")
                 } else {
                     c.JSON(http.StatusBadRequest, gin.H{"error" : "invalid API access"})
                 }
+            } else {
+                c.JSON(http.StatusBadRequest, gin.H{"error" : "invalid API access"})
             }
         } else {
             c.JSON(http.StatusBadRequest, gin.H{"error" : "invalid API access"})
@@ -143,7 +172,7 @@ func CORSMiddleware() gin.HandlerFunc {
             c.Writer.Header().Set("Access-Control-Expose-Headers","Location")
 
             if c.Request.Method == "OPTIONS" {
-                c.Writer.Header().Set("Access-Control-Allow-Headers","Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Mx-ReqToken,Keep-Alive,X-Requested-With,If-Modified-Since")
+                c.Writer.Header().Set("Access-Control-Allow-Headers","Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Request-Token,X-Request-ID,Keep-Alive,X-Requested-With,If-Modified-Since")
                 c.Writer.Header().Set("Access-Control-Allow-Methods","GET, POST, OPTIONS")
                 c.Writer.Header().Set("Access-Control-Max-Age","1728000")
                 c.Writer.Header().Set("Content-Length","0")

@@ -80,6 +80,17 @@ func (lh *LoginHelper) LoginActivate(user string, token []byte) (err error) {
     } else {
         err = errors.New("Invalid activation code")
     }
-
     return err
+}
+
+func (lh *LoginHelper) LoginRenewToken(user string, token []byte) (retToken []byte, err error) {
+    if lh.IsTokenValid(user, token) {
+        retToken = make([]byte, 32)
+        if _, err = rand.Read(retToken); err == nil {
+            lh.RenewSession(user, retToken, API_TIMEOUT)
+        }
+    } else {
+        err = errors.New("Invalid session token")
+    }
+    return retToken, err
 }
